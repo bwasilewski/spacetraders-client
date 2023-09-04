@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+section {
+  @apply p-4;
+}
+
+#main-header nav {
+  @apply p-4;
+}
+
+#main-header nav li {
+  @apply p-2;
+}
+
+#main-header nav li:first-of-type {
+  @apply pl-0;
+}
