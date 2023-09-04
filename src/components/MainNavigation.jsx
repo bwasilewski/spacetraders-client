@@ -23,6 +23,9 @@ function MainNavigation({player}) {
             <Link to="/">Home</Link>
           </li>
           <li>
+            <Link to="/contracts">Contracts</Link>
+          </li>
+          <li>
             <Link to="/factions">Factions</Link>
           </li>
           <li>

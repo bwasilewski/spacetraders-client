@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import MainNavigation from './components/MainNavigation'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
+import Contracts from './pages/Contracts'
 import Factions from './pages/Factions'
 import Systems from './pages/Systems'
 
@@ -28,6 +29,7 @@ function App() {
         <MainNavigation player={player} />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/contracts" element={<Contracts />} />
           <Route path="/factions" element={<Factions />} />
           <Route path="/systems" element={<Systems />} />
         </Routes>
