@@ -3,7 +3,18 @@ import MainNavigation from './components/MainNavigation'
 import ErrorComponent from './components/ErrorComponent'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
-import { setAgent, setSystem, setWaypoint } from './features/appSlice'
+import { 
+  FetchAgent, 
+  FetchContracts,
+  FetchSystem, 
+  FetchWaypoint 
+} from './api/App'
+import { 
+  setAgent, 
+  setContracts, 
+  setSystem, 
+  setWaypoint 
+} from './features/appSlice'
 import Home from './pages/Home'
 import Contracts from './pages/Contracts'
 import Location from './pages/Location'
@@ -23,63 +34,65 @@ function App() {
   const waypoint = useSelector((state) => {
     return state.app.waypoint
   })
+  const contracts = useSelector((state) => {
+    return state.app.contracts
+  })
   const dispatch = useDispatch()
 
   useEffect(() => {
     if ( agent === null ) { 
-      fetch(`http://localhost:3000/api/player`, {
-      })
-        .then((response) => response.json())
-        .then((data) => {
+      FetchAgent(
+        (data) => {
           if ( data.error ) {
             setError(data.error)
-          } else {
-            dispatch(setAgent(data.data))
-          }
-        })
-        .catch((error) => {
-          setError(error)
-        })
+            } else {
+              dispatch(setAgent(data.data))
+            }
+        }, 
+        (error) => setError(error))
     }
 
     if ( agent !== null && system === null ) {
-      let { headquarters } = agent
-      let splitSymbol = headquarters.split('-')
-      let systemSymbol = `${splitSymbol[0]}-${splitSymbol[1]}`
-      fetch(`http://localhost:3000/api/system/${systemSymbol}`, {
-      })
-        .then((response) => response.json())
-        .then((data) => {
+      let symbolList = agent.headquarters.split('-')
+
+      FetchSystem(
+        `${symbolList[0]}-${symbolList[1]}`,
+        (data) => {
           if ( data.error ) {
             setError(data.error)
           } else {
             dispatch(setSystem(data.data))
           }
-        })
-        .catch((error) => {
-          setError(error)
-        })
+        },
+        (error) => setError(error))
     }
 
     if ( agent !== null && waypoint === null ) {
-      let { headquarters } = agent
-      let splitSymbol = headquarters.split('-')
-      let systemSymbol = `${splitSymbol[0]}-${splitSymbol[1]}`
-      fetch(`http://localhost:3000/api/system/${systemSymbol}/waypoint/${headquarters}`, {
-      })
-        .then((response) => response.json())
-        .then((data) => {
+      FetchWaypoint(
+        agent.headquarters,
+        (data) => {
           if ( data.error ) {
             setError(data.error)
           } else {
             dispatch(setWaypoint(data.data))
           }
-        })
-        .catch((error) => {
-          setError(error)
-        })
+        },
+        (error) => setError(error))
     }
-  }, [agent, dispatch, system, waypoint])
+
+    if ( agent !== null && contracts === null ) {
+      FetchContracts(
+        (data) => {
+          if ( data.error ) {
+            setError(data.error)
+          } else {
+            dispatch(setContracts(data.data))
+          }
+        },
+        (error) => setError(error)
+      )
+    }
+  }, [agent, contracts, dispatch, system, waypoint])
 
   return (
     <main>
