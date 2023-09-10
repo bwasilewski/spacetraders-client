@@ -35,13 +35,22 @@ function Contracts() {
         {contracts.length > 0 ? (
           <ul>
             {console.log('Contracts: ', contracts)}
-            {contracts.map(({id, faction, expiration, deadlineToAccept, type}) => (
+            {contracts.map(({accepted, id, factionSymbol, expiration, deadlineToAccept, terms, type}) => (
               <li key={id}>
                 <h2>ID: {id}</h2>
-                <p>Faction: {faction}</p>
-                <p>Expires: {expiration}</p>
-                <p>Accept By: {deadlineToAccept}</p>
+                <p>Faction: {factionSymbol}</p>
+                <p>Deadline: {terms.deadline}</p>
+                { !accepted && (
+                  <>
+                    <p>Expiration: {expiration}</p>
+                    <p>Accept By: {deadlineToAccept}</p>
+                  </> 
+                )}
                 <p>Type: {type}</p>
+                <div>
+                  <h3>Terms</h3>
+                  <pre>{JSON.stringify(terms, null, 2)}</pre>
+                </div>
               </li>
             ))}
           </ul>

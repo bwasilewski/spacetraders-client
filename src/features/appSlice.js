@@ -7,11 +7,15 @@ const appSlice = createSlice({
       agent: null,
       system: null,
       waypoint: null,
+      contracts: null,
     }
   },
   reducers: {
     setAgent: (state, action) => {
       state.app.agent = action.payload
+    },
+    setContracts: (state, action) => {
+      state.app.contracts = action.payload
     },
     setSystem: (state, action) => {
       state.app.system = action.payload
@@ -22,5 +26,11 @@ const appSlice = createSlice({
   },
 })
 
-export const { setAgent, setError, setSystem, setWaypoint } = appSlice.actions
+export const { 
+  setAgent, 
+  setContracts, 
+  setError, 
+  setSystem, 
+  setWaypoint 
+} = appSlice.actions
 export default appSlice.reducer
