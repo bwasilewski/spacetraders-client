@@ -1,26 +1,23 @@
-import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 
-function MainNavigation({player}) {
-
-  // props validation
-  // https://reactjs.org/docs/typechecking-with-proptypes.html
-  MainNavigation.propTypes = {
-    player: PropTypes.shape({
-      credits: PropTypes.number,
-      headquarters: PropTypes.string,
-      startingFaction: PropTypes.string,
-      symbol: PropTypes.string
-    })
-  }
+function MainNavigation() {
+  const agent = useSelector((state) => {
+    return state.app.agent
+  })
 
   return (
     <header id="main-header">
       <nav>
         <ul className="flex">
-          <li>SpaceTraders!</li>
           <li>
-            <Link to="/">Home</Link>
+            <Link to="/">SpaceTraders!</Link>
+          </li>
+          <li>
+            <Link to="/fleet">Fleet</Link>
+          </li>
+          <li>
+            <Link to="/location">Location</Link>
           </li>
           <li>
             <Link to="/contracts">Contracts</Link>
@@ -32,12 +29,16 @@ function MainNavigation({player}) {
             <Link to="/systems">Systems</Link>
           </li>
         </ul>
-        <ul className="flex">
-          <li>{player.symbol}</li>
-          <li>Headquarters: {player.headquarters}</li>
-          <li>C: {player.credits}</li>
-          <li>Faction: {player.startingFaction}</li>
-        </ul>
+        {agent && (
+          <ul className="flex">
+            <li>{agent.symbol}</li>
+            <li>
+              Headquarters: <Link to="/location">{agent.headquarters}</Link>
+            </li>
+            <li>C: {agent.credits}</li>
+            <li>Faction: {agent.startingFaction}</li>
+          </ul>
+        )}
       </nav>
     </header>
   )

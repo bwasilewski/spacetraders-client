@@ -1,51 +1,65 @@
 import { useEffect, useState } from 'react'
+import SortableTable from '../components/SortableTable'
+import Pagination from '../components/Pagination'
 
 function Factions() {
+  const [currentPage, setCurrentPage] = useState(1)
   const [factions, setFactions] = useState([])
+  const [meta ,setMeta] = useState({})
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/factions')
+    fetch(`http://localhost:3000/api/factions?page=${currentPage}`)
       .then((res) => res.json())
-      .then((data) => setFactions(data.data))
-  }, [])
+      .then((data) => {
+        setFactions(data.data)
+        setMeta(data.meta)
+      })
+  }, [currentPage])
+
+  const basicData = factions.map((faction) => {
+    const { 
+      symbol, 
+      name, 
+      description, 
+      headquarters, 
+      isRecruiting } = faction
+
+    return {
+      symbol,
+      name,
+      description,
+      headquarters,
+      isRecruiting,
+    }
+  })
+
+  const columns = [
+    'symbol', 
+    'name', 
+    'description', 
+    'headquarters', 
+    'isRecruiting'
+  ]
 
   return (
     <>
-      {console.log('Factions: ', factions)}
-      <section>
+      <section className="container mx-auto">
         <h1>Factions</h1>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Symbol</th>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Headquarters</th>
-              <th>Traits</th>
-              <th>Recruiting</th>
-            </tr>
-          </thead>
-          <tbody>
-            {factions.map((faction) => (
-              <tr key={faction.symbol}>
-                {console.log(faction.traits)}
-                <td>{faction.symbol}</td>
-                <td>{faction.name}</td>
-                <td>{faction.description}</td>
-                <td>{faction.headquarters}</td>
-                <td>
-                  {faction.traits.map((trait) => (
-                    <span key={trait.symbol}>{trait.name} </span>
-                  ))}
-                </td>
-                <td>
-                  {faction.recruiting === true ? 'Yes' : 'No'}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {factions.length > 0 && (
+          <>
+            <SortableTable 
+              tableData={basicData} 
+              columns={columns} 
+            />
+            <Pagination
+              meta={meta}
+              goBack={() => setCurrentPage(currentPage - 1)}
+              goForward={() => setCurrentPage(currentPage + 1)}
+            />
+          </>
+        )}
+
       </section>
     </>
   )
