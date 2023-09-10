@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import SortableTable from '../components/SortableTable'
+import { Link } from 'react-router-dom'
 
 function Location() {
   const [waypoints, setWaypoints] = useState(null)
+  const [hasMarket, setHasMarket] = useState(false)
   const currentWaypoint = useSelector((state) => {
     return state.app.waypoint
   })
@@ -16,6 +18,9 @@ function Location() {
 
   useEffect(() => {
     if ( currentWaypoint ) {
+      setHasMarket(currentWaypoint.traits.find((trait) => {
+        return trait.name === 'Marketplace'
+      }))
       let { systemSymbol } = currentWaypoint
       fetch(`http://localhost:3000/api/system/${systemSymbol}/waypoints`, {
       })
@@ -36,37 +41,41 @@ function Location() {
   return (
     <>
       <section>
-        <h1>Current Waypoint: {currentWaypoint.symbol}</h1>
-        <h2>System Information</h2>
+        { currentWaypoint && (
           <>
-            { currentWaypoint && (
+            <h1>Current Waypoint: {currentWaypoint.symbol}</h1>
+            { hasMarket && (
               <>
-                <SortableTable
-                  tableData={[{ ...currentWaypoint }]}
-                  columns={columns} />
-                <div className="flex">
-                  <div className="flex-1">
-                    <h2>Waypoint Traits</h2>
-                    <SortableTable
-                      tableData={currentWaypoint.traits}
-                      columns={['name', 'description']} />
-                  </div>
-                  <div className="flex-1">
-                    { waypoints && (
-                      <>
-                        <h2>Other waypoints in this system:</h2>
-                        <SortableTable
-                          tableData={waypoints.filter((waypoint) => {
-                            return waypoint.symbol !== currentWaypoint.symbol
-                          })}
-                          columns={columns} />
-                      </>
-                    )}
-                  </div>
-                </div>
+                <Link to="/location/market">
+                  <button>Visit Market</button>
+                </Link>
               </>
             )}
+            <SortableTable
+              tableData={[{ ...currentWaypoint }]}
+              columns={columns} />
+            <div className="flex">
+              <div className="flex-1">
+                <h2>Waypoint Traits</h2>
+                <SortableTable
+                  tableData={currentWaypoint.traits}
+                  columns={['name', 'description']} />
+              </div>
+              <div className="flex-1">
+                { waypoints && (
+                  <>
+                    <h2>Other waypoints in this system:</h2>
+                    <SortableTable
+                      tableData={waypoints.filter((waypoint) => {
+                        return waypoint.symbol !== currentWaypoint.symbol
+                      })}
+                      columns={columns} />
+                  </>
+                )}
+              </div>
+            </div>
           </>
+        )}
       </section>
     </>
   )
