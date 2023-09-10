@@ -3,9 +3,9 @@ import PropTypes from 'prop-types'
 function ErrorComponent({error}) {
   ErrorComponent.propTypes = {
     error: PropTypes.shape({
-      code: PropTypes.number.isRequired,
+      code: PropTypes.number,
       message: PropTypes.string.isRequired,
-      data: PropTypes.object.isRequired,
+      data: PropTypes.object,
     }).isRequired,
   }
 
