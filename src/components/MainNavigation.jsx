@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { FetchAgent } from '../api/App'
+import { setAgent } from '../features/appSlice'
 
 function MainNavigation() {
+  const dispatch = useDispatch()
+  const [error, setError] = useState(null)
   const [activeContractCount, setActiveContractCount] = useState(0)
   const agent = useSelector((state) => {
     return state.app.agent
@@ -12,6 +16,18 @@ function MainNavigation() {
   })
 
   useEffect(() => {
+    if ( agent === null ) {
+      FetchAgent(
+        (data) => {
+          if (data.data) {
+            dispatch(setAgent(data.data))
+          }
+          if(data.error) {
+            setError(data.error)
+          }
+        }
+      )
+    }
     if (contracts !== null) {
       let count = 0
       for (let i = 0; i < contracts.length; i++) {
