@@ -1,34 +1,43 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
-import { FetchAgent } from '../api/App'
-import { setAgent } from '../features/appSlice'
+import { Link, NavLink } from 'react-router-dom'
+import PropTypes from 'prop-types'
 
-function MainNavigation() {
-  const dispatch = useDispatch()
-  const [error, setError] = useState(null)
+function MainNavigation({ agent, contracts }) {
+  MainNavigation.propTypes = {
+    agent: PropTypes.object,
+    contracts: PropTypes.arrayOf(PropTypes.object),
+  }
+
   const [activeContractCount, setActiveContractCount] = useState(0)
-  const agent = useSelector((state) => {
-    return state.app.agent
-  })
-  const contracts = useSelector((state) => {
-    return state.app.contracts
-  })
+  const pageList = [
+    {
+      path: '/',
+      name: 'SpaceTraders!'
+    },
+    {
+      path: '/fleet',
+      name: 'Fleet'
+    },
+    {
+      path: '/location',
+      name: 'Location'
+    },
+    {
+      path: '/contracts',
+      name: 'Contracts'
+    },
+    {
+      path: '/factions',
+      name: 'Factions'
+    },
+    {
+      path: '/systems',
+      name: 'Systems'
+    }
+  ]
 
   useEffect(() => {
-    if ( agent === null ) {
-      FetchAgent(
-        (data) => {
-          if (data.data) {
-            dispatch(setAgent(data.data))
-          }
-          if(data.error) {
-            setError(data.error)
-          }
-        }
-      )
-    }
-    if (contracts !== null) {
+    if (contracts !== null ) {
       let count = 0
       for (let i = 0; i < contracts.length; i++) {
         if (contracts[i].accepted && !contracts[i].fulfilled) {
@@ -37,30 +46,21 @@ function MainNavigation() {
       }
       setActiveContractCount(count)
     }
-  }, [contracts])
+  }, [agent, contracts])
+
+  const currentPage = ({isActive}) => isActive ? 'active' : ''
 
   return (
     <header id="main-header">
       <nav>
         <ul className="flex">
-          <li>
-            <Link to="/">SpaceTraders!</Link>
-          </li>
-          <li>
-            <Link to="/fleet">Fleet</Link>
-          </li>
-          <li>
-            <Link to="/location">Location</Link>
-          </li>
-          <li>
-            <Link to="/contracts">Contracts</Link>
-          </li>
-          <li>
-            <Link to="/factions">Factions</Link>
-          </li>
-          <li>
-            <Link to="/systems">Systems</Link>
-          </li>
+          { pageList.map((page, index) => (
+            <li key={index}>
+              <NavLink to={page.path} className={currentPage}>
+                {page.name}
+              </NavLink>
+            </li>
+          ))}
         </ul>
         {agent && (
           <ul className="flex">

@@ -43,12 +43,13 @@ function Factions() {
 
   return (
     <>
-      <section className="container mx-auto">
+      <section>
         <h1>Factions</h1>
 
         {factions.length > 0 && (
           <>
             <SortableTable 
+              className="mb-4"
               tableData={basicData} 
               columns={columns} 
             />

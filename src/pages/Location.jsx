@@ -1,24 +1,17 @@
 import { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { connect } from 'react-redux'
 import SortableTable from '../components/SortableTable'
-import { FetchWaypoint, FetchSystem } from '../api/App'
-import { setWaypoint, setSystem } from '../features/appSlice'
 import { Link } from 'react-router-dom'
+import PropTypes from 'prop-types'
 
-function Location() {
-  const dispatch = useDispatch()
-  const [isLoading, setIsLoading] = useState(true)
-  const [waypoints, setWaypoints] = useState(null)
+function Location({ agent, system, waypoint }) {
+  Location.propTypes = {
+    agent: PropTypes.object,
+    system: PropTypes.object,
+    waypoint: PropTypes.object,
+  }
+
   const [hasMarket, setHasMarket] = useState(false)
-  const agent = useSelector((state) => {
-    return state.app.agent
-  })
-  const system = useSelector((state) => {
-    return state.app.system
-  })
-  const currentWaypoint = useSelector((state) => {
-    return state.app.waypoint
-  })
   const columns = [
     'symbol',
     'type',
@@ -26,129 +19,88 @@ function Location() {
     'y',
   ]
 
+  const waypoints = []
+
   useEffect(() => {
-    if ( agent !== null ) {
-      console.log('System: ', system)
-      if ( system === null ) {
-        const { headquarters } = agent
-        const splitSymbol = headquarters.split('-')
-        FetchSystem(
-          `${splitSymbol[0]}-${splitSymbol[1]}`,
-          (data) => {
-            if (data.data) {
-              dispatch(setSystem(data.data))
-            }
-            if (data.error) {
-              // setError(data.error)
-              console.error(data.error)
-            }
-          },
-          (error) => {
-            console.error(error)
-            // setError(error)
-          }
-        )
-      }
-      if ( currentWaypoint === null ) {
-        FetchWaypoint(
-          agent.headquarters,
-          (data) => {
-            if (data.data) {
-              console.log('Waypoint:', data.data)
-              dispatch(setWaypoint(data.data))
-            }
-            if(data.error) {
-              // setError(data.error)
-              console.error(data.error)
-            }
-          },
-          (error) => {
-            console.error(error)
-            // setError(error)
-          }
-        )
-      }
-      if ( currentWaypoint !== null ) {
-        setHasMarket(currentWaypoint.traits.find((trait) => {
+    if ( waypoint !== null ) {
+      setHasMarket(
+        waypoint.traits.some((trait) => {
           return trait.name === 'Marketplace'
-        }))
-        let { systemSymbol } = currentWaypoint
-        fetch(`http://localhost:3000/api/system/${systemSymbol}/waypoints`)
-          .then((response) => response.json())
-          .then((data) => {
-            if ( data.error ) {
-              console.log(data.error)
-            } else {
-              console.log('Waypoints:', data.data)
-              setWaypoints(data.data)
-            }
-            setIsLoading(false)
-          })
-          .catch((error) => {
-            console.log(error)
-            setIsLoading(false)
-          })
-      }
+        })
+      )
     }
 
-    if ( agent !== null && currentWaypoint !== null ) {
-      setIsLoading(false)
-    }
-  }, [agent, dispatch, currentWaypoint, isLoading, system])
+    console.log('System: ', system)
+  }, [agent, system, waypoint])
 
   return (
-    <>
-      {!isLoading && (
-        <section>
-          {console.log('Loading:', isLoading)}
-          { isLoading === false && (
-          <>
-          { currentWaypoint && (
-            <>
-              <h1>Current Waypoint: {currentWaypoint.symbol}</h1>
-              { hasMarket && (
+    <section>
+      { waypoint && (
+        <>
+          <div className="mb-4">
+            <h1>Current Waypoint: {waypoint.symbol}</h1>
+            { hasMarket && (
+              <>
+                <Link to={`/waypoint/${waypoint.symbol}/market`}>
+                  <button className="mb-4">Visit Market</button>
+                </Link>
+              </>
+            )}
+            <SortableTable
+              tableData={[{ ...waypoint }]}
+              columns={columns} />
+          </div>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <h2>Waypoint Traits</h2>
+              <SortableTable
+                tableData={waypoint.traits}
+                columns={['name', 'description']} />
+            </div>
+            <div className="flex-1">
+              { system && waypoints && (
                 <>
-                  <Link to="/location/market">
-                    <button>Visit Market</button>
-                  </Link>
+                  <h2>Other waypoints in this system:</h2>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Symbol</th>
+                        <th>Type</th>
+                        <th>Coordinates</th>
+                        <th>Travel</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      { system.waypoints.map((point) => {
+                        if ( point.symbol !== waypoint.symbol ) {
+                          return (
+                            <tr key={point.symbol}>
+                              <td>{point.symbol}</td>
+                              <td>{point.type}</td>
+                              <td>{point.x}, {point.y}</td>
+                              <td><Link to={`/waypoint/${point.symbol}`}>View waypoint</Link></td>
+                            </tr>
+                          )
+                        }
+                      })}
+                    </tbody>
+                  </table>
                 </>
               )}
-              <SortableTable
-                tableData={[{ ...currentWaypoint }]}
-                columns={columns} />
-              <div className="flex">
-                <div className="flex-1">
-                  <h2>Waypoint Traits</h2>
-                  <SortableTable
-                    tableData={currentWaypoint.traits}
-                    columns={['name', 'description']} />
-                </div>
-                <div className="flex-1">
-                  { waypoints && (
-                    <>
-                      <h2>Other waypoints in this system:</h2>
-                      <SortableTable
-                        tableData={waypoints.filter((waypoint) => {
-                          return waypoint.symbol !== currentWaypoint.symbol
-                        })}
-                        columns={columns} />
-                    </>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
-          </>
-        )}
-        </section>
+            </div>
+          </div>
+        </>
       )}
-      {isLoading && (
-        <section>
-          <h1>Loading...</h1>
-        </section>
-      )}
-    </>
+    </section>
   )
 }
 
-export default Location
+const mapStateToProps = (state) => {
+  return {
+    agent: state.app.agent,
+    system: state.app.system,
+    waypoint: state.app.waypoint,
+  }
+}
+
+export default connect(mapStateToProps)(Location)

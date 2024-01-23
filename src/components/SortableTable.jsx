@@ -1,15 +1,16 @@
 import PropTypes from 'prop-types'
 
 function SortableTable(props) {
-  const { tableData, columns } = props
+  const { tableData, columns, className } = props
   SortableTable.propTypes = {
     tableData: PropTypes.arrayOf(PropTypes.object).isRequired,
     columns: PropTypes.arrayOf(PropTypes.string).isRequired,
+    className: PropTypes.string,
   }
 
   return (
     <>
-      <table>
+      <table className={className}>
         <thead>
           <tr>
             {columns.map((column) => (

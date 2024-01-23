@@ -1,18 +1,15 @@
 import { useEffect } from 'react'
-import dayjs from 'dayjs'
+import FormatDate from '../helpers/FormatDate'
 import { FetchContracts } from '../api/App'
 import { useDispatch, useSelector } from 'react-redux'
 import { setContracts } from '../features/appSlice'
+import { Link } from 'react-router-dom'
 
 function Contracts() {
   const dispatch = useDispatch()
   const contracts = useSelector((state) => {
     return state.app.contracts
   })
-
-  const formatDate = (date) => {
-    return dayjs(date).format('MM/DD/YYYY HH:mm:ss')
-  }
 
   useEffect(() => {
     if ( contracts === null ) {
@@ -49,15 +46,16 @@ function Contracts() {
                 <th>Status</th>
                 <th>Fulfilled</th>
                 <th>Type</th>
+                <th>View</th>
               </tr>
             </thead>
             <tbody>
               {contracts.map(({accepted, id, factionSymbol, fulfilled, expiration, deadlineToAccept, terms, type}) => (
                 <tr key={id}>
                   <td>{factionSymbol}</td>
-                  <td>{formatDate(terms.deadline)}</td>
-                  <td>{formatDate(expiration)}</td>
-                  <td>{formatDate(deadlineToAccept)}</td>
+                  <td>{FormatDate(terms.deadline)}</td>
+                  <td>{FormatDate(expiration)}</td>
+                  <td>{FormatDate(deadlineToAccept)}</td>
                   <td>
                     {accepted && 'Accepted'}
                     {!accepted && 'Pending'}
@@ -67,6 +65,9 @@ function Contracts() {
                     {!fulfilled && 'Not Fulfilled'}
                   </td>
                   <td>{type}</td>
+                  <td>
+                    <Link to={`/contracts/${id}`}>View Contract</Link>
+                  </td>
                 </tr>
               ))}
             </tbody>
